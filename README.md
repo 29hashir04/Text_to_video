@@ -1,0 +1,77 @@
+# Script to AI Video Generator
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/29hashir04/Text_to_video/blob/main/Script_To_AI_Video_Generator.ipynb)
+
+A Google Colab notebook that turns a written script into a set of short, anime-style video clips. Paste a script, click one button, and download a ZIP of 3-second shots with a storyboard. It runs on free services only, so it needs no paid API key.
+
+## How it works
+
+The pipeline has three stages, each with automatic fallbacks so a failing free service never stops the run.
+
+| Stage | What happens | Primary method | Fallbacks |
+|-------|--------------|----------------|-----------|
+| 1. Script to prompts | The script is split into sequential 3-second shots. Each shot gets a camera angle, zoom direction, image prompt and motion prompt. | Qwen2.5-72B-Instruct on a free Hugging Face Space | Built-in offline "director" in Python that always works |
+| 2. Prompts to images | One 1280x720 anime keyframe is generated per shot. | FLUX.1-schnell on Hugging Face | Pollinations image API, then a plain local placeholder slide |
+| 3. Images to video | Each keyframe becomes a 3-second clip. | LTX-Video on Hugging Face (ZeroGPU) | FFmpeg 2.5D camera motion (slow zoom in or out) |
+
+## Features
+
+- **One-click workflow:** paste the script into the text box and press the green button.
+- **Shot planning:** the script is broken into 3-second shots with rotating camera angles (low-angle hero, over-the-shoulder, bird's-eye, macro, tracking and more).
+- **Alternating motion:** zoom direction switches between `zoom_in` and `zoom_out` on every shot.
+- **Flashback look:** lines about the past are tagged and rendered in black and white, and present-day lines stay in full colour.
+- **Style rules built in:** a system prompt (`SOP_PROMPT`) and wardrobe/location rotations keep the look consistent from shot to shot.
+- **Film finish:** light film grain is added to each clip with FFmpeg (H.264, 24 fps).
+- **Storyboard export:** shot-by-shot prompts are saved as readable `.txt` and `.json` files.
+
+## Output
+
+Everything is zipped into `final_3s_clips.zip` and downloaded automatically:
+
+```
+final_3s_clips/
+├── 00_STORYBOARD_PROMPTS.json
+├── 00_STORYBOARD_PROMPTS.txt
+├── generated_images/
+│   └── shot_01.png, shot_02.png, ...
+└── 01_shot_zoom_in.mp4, 02_shot_zoom_out.mp4, 03_shot_BW_zoom_in.mp4, ...
+```
+
+The `BW_` tag in a filename marks a black-and-white flashback shot.
+
+## Requirements
+
+- A Google account (to run the notebook in Colab)
+- An internet connection (the free Hugging Face Spaces and Pollinations are called online)
+- Python packages, installed by the first cells: `gradio_client`, `requests`, `Pillow`, `ipywidgets` (plus `anthropic`, `fal-client`, `aiohttp`, `pydantic`, `nest_asyncio`, which are installed but not used by the current pipeline)
+- FFmpeg, which is preinstalled in Colab
+
+## Usage
+
+1. Click the **Open in Colab** badge above.
+2. Run the install cells at the top (**Runtime → Run all** works too).
+3. Paste your full script into the **Client Script** box.
+4. Click **Start Processing Pipeline**.
+5. Wait for the three stages to finish. The ZIP downloads when it is done.
+
+## Customising
+
+- **Visual style and rules:** edit `SOP_PROMPT`, `CAMERA_ROTATION` and `WARDROBE_ROTATION` to change the look, camera work and characters.
+- **Flashback detection:** change the keyword lists in `local_deterministic_director` that mark a shot as past or present.
+- **Clip length and quality:** adjust the `-t 3.0` duration, `d=72` frame count, resolution and `-crf 18` quality in `render_final_3s_clip`.
+- **Models:** swap the Hugging Face Space names (`Qwen/Qwen2.5-72B-Instruct`, `black-forest-labs/FLUX.1-schnell`, `Lightricks/LTX-Video`) for other Spaces.
+
+## Limitations
+
+- Free Hugging Face Spaces can be slow, queued or rate-limited, so runs may take several minutes and may fall back to the simpler methods.
+- The fallback clips use a slow zoom on a still image, not true AI animation.
+- Generated images depend on the free image models and may not follow every prompt rule exactly.
+- Colab sessions reset, so download the ZIP before closing the notebook.
+
+## Disclaimer
+
+Check the terms of use of each free service (Hugging Face Spaces, Pollinations) before using the output commercially.
+
+## Author
+
+**Hashir Ul Wara**: [GitHub](https://github.com/29hashir04)
