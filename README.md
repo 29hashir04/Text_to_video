@@ -1,3 +1,11 @@
+
+
+https://github.com/user-attachments/assets/93f6cabf-7fa9-429f-a95e-17eddb8f097d
+
+
+
+https://github.com/user-attachments/assets/6ceeaf35-6345-4e99-be51-b106394fbb39
+
 # Script to AI Video Generator
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/29hashir04/Text_to_video/blob/main/Script_To_AI_Video_Generator.ipynb)
